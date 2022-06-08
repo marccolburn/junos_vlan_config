@@ -1,0 +1,18 @@
+---
+- name: Generate config in text for debug
+  template:                                                                                                                             
+    src: "junos_vlan_config.j2"
+    dest: "./debug_configs/{{ inventory_hostname }}_vlan_config.txt"
+  when: vlan_remove == False and config_debug == True
+
+- name: Configure Junos VLAN
+  junos_config:
+    lines: "{{ lookup('template', 'junos_vlan_config.j2').split('\n') }}"
+    comment: Create VLANs
+  when: vlan_remove == False and config_debug == False
+
+- name: Remove VLANs
+  junos_config:
+    lines: "{{ lookup('template', 'junos_vlan_remove.j2').split('\n') }}"
+    comment: Remove VLANs
+  when: vlan_remove == True and config_debug == False

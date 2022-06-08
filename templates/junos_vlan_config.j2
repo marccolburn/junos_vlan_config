@@ -1,0 +1,19 @@
+delete vlans
+{% for vlan in vlans %}
+set vlans {{ vlan.name }} vlan-id {{ vlan.id }}
+{% if vlan.l3_interface is defined %}
+set vlans {{ vlan.name }} l3-interface {{ vlan.l3_interface }}
+{% endif %}
+{% endfor %}
+{% for interface in physical_interfaces %}
+{% if interface.vlan is defined %}
+set interfaces {{ interface.name }} unit 0 family ethernet-switching interface-mode {{ interface.mode }}
+delete interfaces {{ interface.name }} unit 0 family ethernet-switching vlan members
+{% for vlan in interface.vlan.members %}
+set interfaces {{ interface.name }} unit 0 family ethernet-switching vlan members {{ vlan }}
+{% endfor %}
+{% if interface.vlan.native_id is defined %}
+set interfaces {{ interface.name }} native-vlan-id {{ interface.vlan.native_id }}
+{% endif %}
+{% endif %}
+{% endfor %}
